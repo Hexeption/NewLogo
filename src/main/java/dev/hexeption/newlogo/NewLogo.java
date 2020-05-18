@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Template for Fabric Mods
+ * New Logo
  * Copyright (C) 2020  Hexeption (Keir Davis)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,11 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-package dev.hexeption.template;
+package dev.hexeption.newlogo;
 
 import net.fabricmc.api.ModInitializer;
 
-public class Template implements ModInitializer {
+public class NewLogo implements ModInitializer {
 
     @Override
     public void onInitialize() {

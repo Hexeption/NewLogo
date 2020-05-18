@@ -1,26 +1,26 @@
 {
   "schemaVersion": 1,
-  "id": "template",
+  "id": "newlogo",
   "version": "${version}",
-  "name": "Template",
-  "description": "A template for Fabric Mods ",
+  "name": "New Logo",
+  "description": "Adds Mojang Studios new logo",
   "authors": [
     "Hexeption"
   ],
   "contact": {
     "homepage": "https://hexeption.dev",
-    "sources": "https://github.com/Hexeption/Hex-Fabric-Template"
+    "sources": "https://github.com/Hexeption/NewLogo"
   },
   "license": "CC0-1.0",
   "icon": "assets/template/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "dev.hexeption.template.Template"
+      "dev.hexeption.newlogo.NewLogo"
     ]
   },
   "mixins": [
-    "template.mixins.json"
+    "newlogo.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.8.2+build.194",

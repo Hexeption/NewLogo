@@ -19,6 +19,10 @@
 package dev.hexeption.newlogo.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.hexeption.newlogo.NewLogo;
+import dev.hexeption.newlogo.animatedTexture.AnimatedTexture;
+import dev.hexeption.newlogo.animatedTexture.ImageData;
+import dev.hexeption.newlogo.util.GifDecoder;
 import java.awt.Color;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -31,10 +35,14 @@ import net.minecraft.resource.ResourceReloadMonitor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
+import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * MixinSplashScreen
@@ -73,6 +81,19 @@ public abstract class MixinSplashScreen extends Overlay {
     @Shadow
     protected abstract void renderProgressBar(int minX, int minY, int maxX, int maxY, float progress);
 
+    private static GifDecoder gifDecoder;
+
+    private static AnimatedTexture animatedTexture;
+
+    @Inject(method = "init", at = @At("RETURN"))
+    private static void intt(MinecraftClient client, CallbackInfo ci) {
+        gifDecoder = new GifDecoder();
+        gifDecoder.read(NewLogo.class.getResourceAsStream("/mojang-logo.gif"));
+
+        animatedTexture = new AnimatedTexture(new ImageData(gifDecoder));
+    }
+
+
     /**
      * @author New Loading Screen
      */
@@ -106,17 +127,23 @@ public abstract class MixinSplashScreen extends Overlay {
             fill(0, 0, i, j, 15675965 | m << 24);
             o = MathHelper.clamp(g, 0.0F, 1.0F);
         } else {
-            fill(0, 0, i, j, -1);
+            fill(0, 0, i, j, new Color(15675965).hashCode());
             o = 1.0F;
         }
 
-//        m = (this.client.getWindow().getScaledWidth() - 256) / 2;
-//        int q = (this.client.getWindow().getScaledHeight() - 256) / 2;
-//        this.client.getTextureManager().bindTexture(LOGO);
-//        RenderSystem.enableBlend();
-//        Color color = new Color(15675965);
-//        RenderSystem.color4f(color.getRed(), color.getGreen(), color.getBlue(), o);
-//        this.blit(m, q, 0, 0, 256, 256);
+        m = (this.client.getWindow().getScaledWidth() - 256) / 2;
+        int q = (this.client.getWindow().getScaledHeight() - 256) / 2;
+
+        animatedTexture.tick();
+        int textureID = animatedTexture.getTextureID();
+        if (textureID != -1) {
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+            RenderSystem.enableBlend();
+            Color color = new Color(15675965);
+            RenderSystem.color4f(color.getRed(), color.getGreen(), color.getBlue(), o);
+            this.blit(m, q, 0, 0, 1280+200, 720);
+        }
+
         float r = this.reloadMonitor.getProgress();
         this.progress = MathHelper.clamp(this.progress * 0.95F + r * 0.050000012F, 0.0F, 1.0F);
         if (f < 1.0F) {
@@ -127,19 +154,19 @@ public abstract class MixinSplashScreen extends Overlay {
             this.client.setOverlay((Overlay) null);
         }
 
-        if (this.applyCompleteTime == -1L && this.reloadMonitor.isApplyStageComplete() && (!this.reloading || g >= 2.0F)) {
-            try {
-                this.reloadMonitor.throwExceptions();
-                this.exceptionHandler.accept(Optional.empty());
-            } catch (Throwable var15) {
-                this.exceptionHandler.accept(Optional.of(var15));
-            }
-
-            this.applyCompleteTime = Util.getMeasuringTimeMs();
-            if (this.client.currentScreen != null) {
-                this.client.currentScreen.init(this.client, this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
-            }
-        }
+//        if (this.applyCompleteTime == -1L && this.reloadMonitor.isApplyStageComplete() && (!this.reloading || g >= 2.0F)) {
+//            try {
+//                this.reloadMonitor.throwExceptions();
+//                this.exceptionHandler.accept(Optional.empty());
+//            } catch (Throwable var15) {
+//                this.exceptionHandler.accept(Optional.of(var15));
+//            }
+//
+//            this.applyCompleteTime = Util.getMeasuringTimeMs();
+//            if (this.client.currentScreen != null) {
+//                this.client.currentScreen.init(this.client, this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
+//            }
+//        }
 
     }
 }
